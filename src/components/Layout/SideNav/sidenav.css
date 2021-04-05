@@ -1,0 +1,8 @@
+.pro-sidebar > .pro-sidebar-inner {
+  background: #f1f1f1 !important;
+}
+
+.pro-sidebar .pro-menu.shaped .pro-menu-item > .pro-inner-item > .pro-icon-wrapper {
+    background-color: #fff !important;
+    color: #40B461 !important;
+}
