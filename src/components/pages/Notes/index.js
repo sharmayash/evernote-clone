@@ -14,23 +14,87 @@ import {
 import { FaExpandAlt } from "react-icons/fa";
 import { AiOutlineDelete, AiOutlineStar } from "react-icons/ai";
 import CustomEditor from "../../common/CustomEditor";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addNewNote,
+  editExistingNote,
+  setActiveNote,
+} from "../../../redux/actions/noteActions";
 
 const Notes = (props) => {
+  const dispatch = useDispatch();
+  const allNotes = useSelector((state) => state.note.notes);
+  const activeNote = useSelector((state) => state.note.activeNote);
   let newQuickNote = props?.location?.state?.newNote || false;
   let [fromQuickNoteBtn, setNoteFromQuickNoteBtn] = useState(false);
   let [isTwoWindow, toggleTwoWindow] = useState(true);
+
+  const [noteTitle, setNoteTitle] = useState("");
+  const [noteRichText, setNoteRichText] = useState("");
 
   useEffect(() => {
     setNoteFromQuickNoteBtn(newQuickNote);
   }, [newQuickNote]);
 
   useEffect(() => {
-    if (fromQuickNoteBtn) toggleTwoWindow(false);
-    else toggleTwoWindow(true);
+    if (fromQuickNoteBtn) {
+      toggleTwoWindow(false);
+      openANote({
+        id: null,
+        isFav: false,
+        date: new Date().toLocaleDateString(),
+        title: "",
+        richText: "",
+      });
+    } else toggleTwoWindow(true);
+    // eslint-disable-next-line
   }, [fromQuickNoteBtn]);
 
-  const handleEditorChange = (e) => {
-    console.log(e.target.getContent());
+  useEffect(() => {
+    setNoteTitle(activeNote?.title || "");
+    setNoteRichText(activeNote?.richText || "");
+  }, [activeNote]);
+
+  const openANote = (note) => {
+    dispatch(setActiveNote(note));
+  };
+
+  const handleEditorChange = (content, editor) => {
+    setNoteRichText(content);
+  };
+
+  const handleSubmit = () => {
+    activeNote?.id
+      ? dispatch(
+          editExistingNote({
+            id: activeNote?.id,
+            isFav: activeNote?.isFav,
+            date: activeNote?.date,
+            title: noteTitle,
+            richText: noteRichText,
+          })
+        )
+      : dispatch(
+          addNewNote({
+            id: allNotes.length + 1,
+            isFav: false,
+            date: new Date().toLocaleDateString(),
+            title: noteTitle,
+            richText: noteRichText,
+          })
+        );
+  };
+
+  const stripHtml = (dirtyString) => {
+    const doc = new DOMParser().parseFromString(dirtyString, "text/html");
+
+    return doc.body.textContent || "";
+  };
+
+  const getDesc = (text) => {
+    return typeof text === "string"
+      ? stripHtml(text).slice(0, 100) + " ......"
+      : stripHtml(text?.target?.getContent()).slice(0, 100) + " ......";
   };
 
   return (
@@ -38,54 +102,69 @@ const Notes = (props) => {
       <Row>
         <Col xs={12} md={3} className={isTwoWindow ? "col1" : "hideCol"}>
           <h3 className="head1">NOTES</h3>
-          <div className="noteCard">
-            <Row>
-              <Col xs={12} lg={6}>
-                <p className="crdTitle">Get Started</p>
-              </Col>
-              <Col xs={12} lg={6} style={{ textAlign: "right" }}>
-                <OverlayTrigger
-                  overlay={<Tooltip id="starNote">Mark Favourite</Tooltip>}
-                >
-                  <AiOutlineStar style={{ color: "#fff", cursor: "pointer" }} />
-                </OverlayTrigger>
-                <OverlayTrigger
-                  overlay={<Tooltip id="deleteNote">Delete Note</Tooltip>}
-                >
-                  <AiOutlineDelete
-                    style={{ color: "#fff", cursor: "pointer" }}
-                  />
-                </OverlayTrigger>
-              </Col>
-            </Row>
-            <p className="date">22/22/2222</p>
-            <p className="desc">
-              lorem ipsum dolor sit lorem ipsum dolor sit lorem ipsum dolor sit
-              lorem ipsum dolor sit lorem ipsum dolor sit
-            </p>
-          </div>
+          {allNotes.map((note) => {
+            return (
+              <div
+                className="noteCard"
+                key={note.id}
+                onClick={() => openANote(note)}
+              >
+                <Row>
+                  <Col xs={12} lg={6}>
+                    <p className="crdTitle">{note.title}</p>
+                  </Col>
+                  <Col xs={12} lg={6} style={{ textAlign: "right" }}>
+                    <OverlayTrigger
+                      overlay={<Tooltip id="starNote">Mark Favourite</Tooltip>}
+                    >
+                      <AiOutlineStar
+                        style={{ color: "#fff", cursor: "pointer" }}
+                      />
+                    </OverlayTrigger>
+                    <OverlayTrigger
+                      overlay={<Tooltip id="deleteNote">Delete Note</Tooltip>}
+                    >
+                      <AiOutlineDelete
+                        style={{ color: "#fff", cursor: "pointer" }}
+                      />
+                    </OverlayTrigger>
+                  </Col>
+                </Row>
+                <p className="date">{note.date}</p>
+                <p className="desc">{getDesc(note?.richText)}</p>
+              </div>
+            );
+          })}
         </Col>
         <Col xs={12} md={isTwoWindow ? 9 : 12} className="col2">
           <div className="editorHead">
-            <div>
+            <div className="rightMenu">
               <FaExpandAlt
                 className="expandIcn"
                 onClick={() => toggleTwoWindow(!isTwoWindow)}
               />
-              <Form.Control size="sm" placeholder="Enter Title" />
+              <Form.Control
+                size="sm"
+                value={noteTitle}
+                placeholder="Enter Title"
+                onChange={(e) => setNoteTitle(e.target.value)}
+              />
             </div>
-            <div>
+            <div className="leftMenu">
               <p>NoteBook 1 selected</p>
               <DropdownButton title="Select NoteBook" size="sm">
                 <Dropdown.Item as="button">NoteBook 1</Dropdown.Item>
                 <Dropdown.Item as="button">NoteBook 2</Dropdown.Item>
               </DropdownButton>
-              <Button size="sm" variant="success">
+              <Button size="sm" variant="success" onClick={handleSubmit}>
                 Save
               </Button>
             </div>
           </div>
-          <CustomEditor handleEditorChange={handleEditorChange} />
+          <CustomEditor
+            initialValue={noteRichText}
+            handleEditorChange={handleEditorChange}
+          />
         </Col>
       </Row>
     </Container>
