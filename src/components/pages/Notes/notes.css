@@ -9,6 +9,8 @@ p {
 }
 .col1 {
   padding: 0;
+  overflow: auto;
+  max-height: 100vh;
   border-right: 1px solid #eeeeee;
 }
 .col1 > .head1 {
@@ -18,10 +20,12 @@ p {
   color: #c2c0c2;
 }
 .col1 > .noteCard {
-  width: 100%;
+  width: 96%;
+  margin: 0 2%;
   padding: 4%;
   cursor: pointer;
   margin-bottom: 2%;
+  min-height: 150px;
   border-radius: 4px;
   background-color: #3eb45f;
 }

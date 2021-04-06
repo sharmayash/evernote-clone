@@ -1,10 +1,11 @@
 import React from "react";
 import { Editor } from "@tinymce/tinymce-react";
 
-const CustomEditor = ({ initialValue, handleEditorChange }) => {
+const CustomEditor = ({ value, handleEditorChange }) => {
   return (
     <Editor
-      initialValue={initialValue}
+      value={value}
+      onEditorChange={handleEditorChange}
       apiKey="bztg7tgsaoue6ywmb6ftbap5izwuqmzkicybtrrmj2vpx4s8"
       init={{
         width: "100%",
@@ -234,7 +235,6 @@ const CustomEditor = ({ initialValue, handleEditorChange }) => {
           },
         ],
       }}
-      onChange={handleEditorChange}
     />
   );
 };

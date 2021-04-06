@@ -12,25 +12,29 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import { FaExpandAlt } from "react-icons/fa";
-import { AiOutlineDelete, AiOutlineStar } from "react-icons/ai";
+import { AiFillStar, AiOutlineDelete, AiOutlineStar } from "react-icons/ai";
 import CustomEditor from "../../common/CustomEditor";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addNewNote,
+  deleteNote,
   editExistingNote,
   setActiveNote,
+  starNote,
 } from "../../../redux/actions/noteActions";
 
 const Notes = (props) => {
   const dispatch = useDispatch();
+
   const allNotes = useSelector((state) => state.note.notes);
   const activeNote = useSelector((state) => state.note.activeNote);
-  let newQuickNote = props?.location?.state?.newNote || false;
-  let [fromQuickNoteBtn, setNoteFromQuickNoteBtn] = useState(false);
-  let [isTwoWindow, toggleTwoWindow] = useState(true);
 
   const [noteTitle, setNoteTitle] = useState("");
   const [noteRichText, setNoteRichText] = useState("");
+  const [isTwoWindow, toggleTwoWindow] = useState(true);
+  const [fromQuickNoteBtn, setNoteFromQuickNoteBtn] = useState(false);
+
+  let newQuickNote = props?.location?.state?.newNote || false;
 
   useEffect(() => {
     setNoteFromQuickNoteBtn(newQuickNote);
@@ -59,10 +63,6 @@ const Notes = (props) => {
     dispatch(setActiveNote(note));
   };
 
-  const handleEditorChange = (content, editor) => {
-    setNoteRichText(content);
-  };
-
   const handleSubmit = () => {
     activeNote?.id
       ? dispatch(
@@ -83,18 +83,13 @@ const Notes = (props) => {
             richText: noteRichText,
           })
         );
+    props.history.push("/notes");
   };
 
   const stripHtml = (dirtyString) => {
     const doc = new DOMParser().parseFromString(dirtyString, "text/html");
 
     return doc.body.textContent || "";
-  };
-
-  const getDesc = (text) => {
-    return typeof text === "string"
-      ? stripHtml(text).slice(0, 100) + " ......"
-      : stripHtml(text?.target?.getContent()).slice(0, 100) + " ......";
   };
 
   return (
@@ -115,23 +110,44 @@ const Notes = (props) => {
                   </Col>
                   <Col xs={12} lg={6} style={{ textAlign: "right" }}>
                     <OverlayTrigger
-                      overlay={<Tooltip id="starNote">Mark Favourite</Tooltip>}
+                      overlay={
+                        <Tooltip id="starNote">
+                          {note.isFav
+                            ? "Mark as Not Favourite"
+                            : "Mark Favourite"}
+                        </Tooltip>
+                      }
                     >
-                      <AiOutlineStar
-                        style={{ color: "#fff", cursor: "pointer" }}
-                      />
+                      {note.isFav ? (
+                        <AiFillStar
+                          onClick={() =>
+                            dispatch(starNote(note.id, note.isFav))
+                          }
+                          style={{ color: "#fff", cursor: "pointer" }}
+                        />
+                      ) : (
+                        <AiOutlineStar
+                          onClick={() =>
+                            dispatch(starNote(note.id, note.isFav))
+                          }
+                          style={{ color: "#fff", cursor: "pointer" }}
+                        />
+                      )}
                     </OverlayTrigger>
                     <OverlayTrigger
                       overlay={<Tooltip id="deleteNote">Delete Note</Tooltip>}
                     >
                       <AiOutlineDelete
+                        onClick={() => dispatch(deleteNote(note.id))}
                         style={{ color: "#fff", cursor: "pointer" }}
                       />
                     </OverlayTrigger>
                   </Col>
                 </Row>
                 <p className="date">{note.date}</p>
-                <p className="desc">{getDesc(note?.richText)}</p>
+                <p className="desc">
+                  {stripHtml(note?.richText).slice(0, 90)}
+                </p>
               </div>
             );
           })}
@@ -162,8 +178,8 @@ const Notes = (props) => {
             </div>
           </div>
           <CustomEditor
-            initialValue={noteRichText}
-            handleEditorChange={handleEditorChange}
+            value={noteRichText}
+            handleEditorChange={(e) => setNoteRichText(e)}
           />
         </Col>
       </Row>

@@ -1,4 +1,10 @@
-import { ADD_NOTE, EDIT_NOTE, SET_ACTIVE_NOTE } from "../types";
+import {
+  ADD_NOTE,
+  DELETE_NOTE,
+  EDIT_NOTE,
+  SET_ACTIVE_NOTE,
+  STAR_NOTE,
+} from "../types";
 
 const initialState = {
   notes: [],
@@ -10,6 +16,7 @@ const user = (state = initialState, action) => {
     case ADD_NOTE:
       return {
         ...state,
+        activeNote: action.payload,
         notes: [action.payload, ...state.notes],
       };
     case EDIT_NOTE:
@@ -20,11 +27,23 @@ const user = (state = initialState, action) => {
         ),
         activeNote: action.payload,
       };
-    // case STAR_NOTE:
-    //   return {
-    //     ...state,
-    //     notes: action.payload,
-    //   };
+    case DELETE_NOTE:
+      return {
+        ...state,
+        notes: state.notes.filter((note) => note.id !== action.payload),
+      };
+    case STAR_NOTE:
+      return {
+        ...state,
+        notes: state.notes.map((note) =>
+          note.id === action.payload.id
+            ? {
+                ...note,
+                isFav: !action.payload.isFav,
+              }
+            : note
+        ),
+      };
     case SET_ACTIVE_NOTE:
       return {
         ...state,
