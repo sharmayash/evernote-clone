@@ -23,6 +23,7 @@ import {
   starNote,
 } from "../../../redux/actions/noteActions";
 import { addNoteToNotpad } from "../../../redux/actions/notepadActions";
+import CustomModal from "../../common/CustomModal";
 
 const Notes = (props) => {
   const dispatch = useDispatch();
@@ -34,8 +35,10 @@ const Notes = (props) => {
   const [noteTitle, setNoteTitle] = useState("");
   const [noteRichText, setNoteRichText] = useState("");
   const [isTwoWindow, toggleTwoWindow] = useState(true);
-  const [fromQuickNoteBtn, setNoteFromQuickNoteBtn] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteNoteId, setDeleteNoteId] = useState(null);
   const [selectedNotepad, selectNotepad] = useState({});
+  const [fromQuickNoteBtn, setNoteFromQuickNoteBtn] = useState(false);
 
   let newQuickNote = props?.location?.state?.newNote || false;
 
@@ -105,6 +108,24 @@ const Notes = (props) => {
     return doc.body.textContent || "";
   };
 
+  const openModal = (id) => {
+    setIsModalOpen(true);
+    setDeleteNoteId(id);
+  };
+
+  const handleDelete = () => {
+    dispatch(deleteNote(deleteNoteId));
+    setIsModalOpen(false);
+    setDeleteNoteId(null);
+    openANote({
+      id: null,
+      isFav: false,
+      date: new Date().toLocaleDateString(),
+      title: "",
+      richText: "",
+    });
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -151,7 +172,7 @@ const Notes = (props) => {
                       overlay={<Tooltip id="deleteNote">Delete Note</Tooltip>}
                     >
                       <AiOutlineDelete
-                        onClick={() => dispatch(deleteNote(note.id))}
+                        onClick={() => openModal(note.id)}
                         style={{ color: "#fff", cursor: "pointer" }}
                       />
                     </OverlayTrigger>
@@ -201,6 +222,11 @@ const Notes = (props) => {
           />
         </Col>
       </Row>
+      <CustomModal
+        show={isModalOpen}
+        handleSubmit={handleDelete}
+        handleClose={() => setIsModalOpen(false)}
+      />
     </Container>
   );
 };

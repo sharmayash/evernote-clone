@@ -13,6 +13,12 @@ h1 {
   font-weight: 400;
   color: #c2c0c2;
 }
+h2 {
+  margin: 22px 5%;
+  font-size: 26px;
+  font-weight: 400;
+  color: #c2c0c2;
+}
 
 .crdheader {
   width: 100%;

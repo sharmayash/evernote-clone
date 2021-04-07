@@ -27,23 +27,28 @@ p {
   margin-bottom: 2%;
   min-height: 150px;
   border-radius: 4px;
+  color: #8f8e8f;
+  border: 1px solid #c2c0c2;
+  background-color: #fff;
+}
+
+.col1 > .noteCard:hover {
+  color: #bbf3ce;
   background-color: #3eb45f;
 }
+
 .crdTitle {
   font-size: 20px;
   font-weight: 400;
-  color: #bbf3ce;
 }
 .date {
   font-size: 12px;
   font-weight: 400;
-  color: #bbf3ce;
 }
 .desc {
   margin-top: 2%;
   font-size: 14px;
   font-weight: 400;
-  color: #bbf3ce;
   max-width: 230px;
 }
 
