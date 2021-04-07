@@ -22,17 +22,20 @@ import {
   setActiveNote,
   starNote,
 } from "../../../redux/actions/noteActions";
+import { addNoteToNotpad } from "../../../redux/actions/notepadActions";
 
 const Notes = (props) => {
   const dispatch = useDispatch();
 
   const allNotes = useSelector((state) => state.note.notes);
   const activeNote = useSelector((state) => state.note.activeNote);
+  const notepads = useSelector((state) => state.notepad.notepads);
 
   const [noteTitle, setNoteTitle] = useState("");
   const [noteRichText, setNoteRichText] = useState("");
   const [isTwoWindow, toggleTwoWindow] = useState(true);
   const [fromQuickNoteBtn, setNoteFromQuickNoteBtn] = useState(false);
+  const [selectedNotepad, selectNotepad] = useState({});
 
   let newQuickNote = props?.location?.state?.newNote || false;
 
@@ -83,6 +86,16 @@ const Notes = (props) => {
             richText: noteRichText,
           })
         );
+    selectedNotepad?.id &&
+      dispatch(
+        addNoteToNotpad(selectedNotepad?.id, {
+          id: allNotes.length + 1,
+          isFav: false,
+          date: new Date().toLocaleDateString(),
+          title: noteTitle,
+          richText: noteRichText,
+        })
+      );
     props.history.push("/notes");
   };
 
@@ -145,9 +158,7 @@ const Notes = (props) => {
                   </Col>
                 </Row>
                 <p className="date">{note.date}</p>
-                <p className="desc">
-                  {stripHtml(note?.richText).slice(0, 90)}
-                </p>
+                <p className="desc">{stripHtml(note?.richText).slice(0, 90)}</p>
               </div>
             );
           })}
@@ -167,10 +178,17 @@ const Notes = (props) => {
               />
             </div>
             <div className="leftMenu">
-              <p>NoteBook 1 selected</p>
+              <p>{selectedNotepad?.title}</p>
               <DropdownButton title="Select NoteBook" size="sm">
-                <Dropdown.Item as="button">NoteBook 1</Dropdown.Item>
-                <Dropdown.Item as="button">NoteBook 2</Dropdown.Item>
+                {notepads.map((notepad) => (
+                  <Dropdown.Item
+                    as="button"
+                    key={notepad.id}
+                    onClick={() => selectNotepad(notepad)}
+                  >
+                    {notepad.title}
+                  </Dropdown.Item>
+                ))}
               </DropdownButton>
               <Button size="sm" variant="success" onClick={handleSubmit}>
                 Save

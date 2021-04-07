@@ -1,0 +1,22 @@
+.row1 {
+  height: fit-content;
+}
+
+.row2 {
+  display: flex;
+  align-items: center;
+}
+
+h1 {
+  margin: 22px 5%;
+  font-size: 32px;
+  font-weight: 400;
+  color: #c2c0c2;
+}
+
+.crdheader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
